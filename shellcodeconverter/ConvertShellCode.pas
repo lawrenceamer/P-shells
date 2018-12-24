@@ -1,16 +1,31 @@
-Uses Windows,sysutils;
+program Project1;
 
-Procedure LoadShellCode(ShellContent:String);
-Function GetShellCodeSize(ShellContent:String):Cardinal;
-Function ConvertShellCode(ShellContent:String):String;
+{$APPTYPE CONSOLE}
 
-Implementation
+uses
+  SysUtils,classes;
 
-{Convert C++ ShellCode To Delphi-----------------------------------------------}
+
+function LoadshellToStr(const FileName: TFileName): AnsiString;
+var
+  FileStream : TFileStream;
+begin
+  FileStream:= TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    try
+     if FileStream.Size>0 then
+     begin
+      SetLength(Result, FileStream.Size);
+      FileStream.Read(Pointer(Result)^, FileStream.Size);
+     end;
+    finally
+     FileStream.Free;
+    end;
+end;
+
 Function ConvertShellCode(ShellContent:String):String;
 Begin
 try
-{Removing useless and C++ carracters}
+
 ShellContent := StringReplace(ShellContent, '\x', ',$', [rfReplaceAll,rfIgnoreCase]);
 ShellContent := StringReplace(ShellContent, '"', '', [rfReplaceAll,rfIgnoreCase]);
 ShellContent := StringReplace(ShellContent, '''', '', [rfReplaceAll,rfIgnoreCase]);
@@ -28,3 +43,20 @@ Result := 'Error.';
 Exit;
 End;
 End;
+var
+content : string;
+converted : widestring;
+F: TextFile;
+begin
+  try
+  content := loadshelltostr('C:\sh\c-shell.txt');
+  converted := convertshellcode(content);
+  AssignFile(F, 'C:\sh\pascalshell.txt');
+  Rewrite(F);
+  WriteLn(F, converted);
+  CloseFile(F);
+  except
+    on E: Exception do
+      Writeln(E.ClassName, ': ', E.Message);
+  end;
+end.
