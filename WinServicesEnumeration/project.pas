@@ -1,5 +1,5 @@
 program Project1;
-
+//credits by : Lawrence Amer  
 {$APPTYPE CONSOLE}
 
 uses
